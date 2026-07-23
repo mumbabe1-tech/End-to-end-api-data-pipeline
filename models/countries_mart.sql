@@ -1,15 +1,5 @@
-
--- Purpose:
---   To create a curated countries table for analytics.
---   This model transforms staging data into a clean,
---   analysis-ready structure for the Triplens project.
+-- Purpose: Create a curated, analysis-ready countries table
 ------------------------------------------------------------
-
-WITH staging_countries AS (
-    SELECT *
-    FROM {{ ref('stage_raw_countries') }}
-)
-
 SELECT
     country_code,
     country_name,
@@ -24,8 +14,9 @@ SELECT
     ROUND(
         population / NULLIF(total_area_square_kilometers, 0),
         2
-    ) AS population_density_per_square_kilometer,
+    ) AS population_density_per_sq_km,
 
     -- Metadata
-    INGESTED_AT AS last_updated_at
-FROM staging_countries;
+    ingested_at AS last_updated_at
+
+FROM {{ ref('stage_raw_countries') }}
