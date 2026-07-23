@@ -48,6 +48,5 @@ jobs:
           DBT_SNOWFLAKE_DATABASE: TRIPLENS_DB
           DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
         run: |
-          cd dbt_project
           dbt run --profiles-dir .
           dbt test --profiles-dir .
