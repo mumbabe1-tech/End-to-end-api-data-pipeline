@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Get the project code (Updated to v7)
+      # 1. Get the project code
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
-      # 2. Set up Python (Updated to v6)
+      # 2. Set up Python
       - name: Set up Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -36,7 +36,7 @@ jobs:
           AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
           API_KEY: ${{ secrets.API_KEY }}
         run: |
-          python scripts/fetch_and_upload.py
+          python scripts/extract_country_data.py
 
       # 5. Run dbt transformations in Snowflake
       - name: Run dbt models

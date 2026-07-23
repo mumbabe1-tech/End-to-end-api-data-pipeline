@@ -12,17 +12,14 @@ import datetime
 import requests
 import boto3
 
-
 # Configuration (loaded from environment variables)
 # ==========================================
 
 # Public API endpoint for country data
 API_URL = "https://restcountries.com/v3.1/all"
 
-# S3 bucket name (default provided for safety)
-BUCKET_NAME = os.getenv("triplens-landing-zone-ifeoma1", "triplens-raw-data")
-
-# AWS region (default provided)
+# S3 bucket name & AWS region
+BUCKET_NAME = os.getenv("AWS_S3_BUCKET_NAME", "triplens-landing-zone-ifeoma1")
 AWS_REGION = os.getenv("AWS_REGION", "eu-north-1")
 
 
@@ -31,7 +28,6 @@ AWS_REGION = os.getenv("AWS_REGION", "eu-north-1")
 def fetch_country_data():
     """
     Calls the REST Countries API and returns the raw JSON response.
-    Function represents the 'extraction' step in a data pipeline.
     """
     print("Fetching data from REST Countries API...")
 
@@ -42,7 +38,6 @@ def fetch_country_data():
     return response.json()
 
 
-# ==========================================
 # Step 2 - Upload Raw Data to AWS S3
 # ==========================================
 def upload_to_s3(data):
@@ -58,18 +53,18 @@ def upload_to_s3(data):
         "s3",
         aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
         aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        region_name=triplens-landing-zone-ifeoma1
+        region_name=AWS_REGION
     )
 
     # Generating a timestamped file name
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     file_key = f"raw_travel_data/countries_{timestamp}.json"
 
-    print(f"Uploading file to S3 bucket '{triplens-landing-zone-ifeoma1}' at key '{file_key}'...")
+    print(f"Uploading file to S3 bucket '{BUCKET_NAME}' at key '{file_key}'...")
 
     # Uploading JSON payload
     s3_client.put_object(
-        Bucket=triplens-landing-zone-ifeoma1,
+        Bucket=BUCKET_NAME,
         Key=file_key,
         Body=json.dumps(data),
         ContentType="application/json"
@@ -81,12 +76,6 @@ def upload_to_s3(data):
 # Main Execution Block
 # ==========================================
 if __name__ == "__main__":
-    """
-    This block runs when the script is executed directly.
-    It performs the full extraction pipeline:
-    1. Fetch data
-    2. Upload to S3
-    """
     try:
         raw_data = fetch_country_data()
         upload_to_s3(raw_data)
