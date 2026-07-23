@@ -21,10 +21,4 @@ clean-targets:
 # Model configurations
 models:
   triplens_dbt:
-    staging:
-      +schema: RAW
-      +materialized: view
-
-    marts:
-      +schema: MARTS
-      +materialized: table
+    +materialized: view
