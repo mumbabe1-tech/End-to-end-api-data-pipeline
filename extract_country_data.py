@@ -1,6 +1,6 @@
 """
 Data extraction script used to:
-1. Fetch raw country/travel data from the REST Countries API.
+1. Fetch raw country/travel data from the countries.dev API (REST Countries replacement).
 2. Upload the raw JSON payload into an AWS S3 bucket for downstream processing.
 
 This script is executed inside GitHub Actions.
@@ -15,21 +15,21 @@ import boto3
 # Configuration (loaded from environment variables)
 # ==========================================
 
-# Public API endpoint for country data
-API_URL = "https://restcountries.com/v3.1/all"
+# Free, keyless API endpoint for country data
+API_URL = "https://countries.dev/countries"
 
 # S3 bucket name & AWS region
 BUCKET_NAME = os.getenv("AWS_S3_BUCKET_NAME", "triplens-landing-zone-ifeoma1")
 AWS_REGION = os.getenv("AWS_REGION", "eu-north-1")
 
 
-# Step 1 - Fetch Data from REST Countries API
+# Step 1 - Fetch Data from Countries API
 # ==========================================
 def fetch_country_data():
     """
-    Calls the REST Countries API and returns the raw JSON response.
+    Calls the Countries API and returns the raw JSON response.
     """
-    print("Fetching data from REST Countries API...")
+    print("Fetching data from Countries API...")
 
     response = requests.get(API_URL, timeout=30)
     response.raise_for_status()  # Raises an error if the API call fails
