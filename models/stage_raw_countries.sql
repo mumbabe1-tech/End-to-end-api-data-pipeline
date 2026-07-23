@@ -30,4 +30,4 @@ SELECT
     -- Metadata
     INGESTED_AT
 FROM raw_country_data
-WHERE RAW_DATA:alpha3Code IS NOT NULL;
+WHERE RAW_DATA:alpha3Code IS NOT NULL
