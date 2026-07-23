@@ -9,7 +9,6 @@ SELECT
     subregion,
     population,
     total_area_square_kilometers,
-    is_un_member,
 
     -- Calculate population density safely
     ROUND(
