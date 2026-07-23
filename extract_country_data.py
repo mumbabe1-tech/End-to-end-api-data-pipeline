@@ -3,7 +3,7 @@ Data extraction script used to:
 1. Fetch raw country/travel data from the countries.dev API (REST Countries replacement).
 2. Upload the raw JSON payload into an AWS S3 bucket for downstream processing.
 
-This script is executed inside GitHub Actions.
+This script is executed inside GitHub Actions and locally via uv/Python.
 """
 
 import os
@@ -11,9 +11,13 @@ import json
 import datetime
 import requests
 import boto3
+from dotenv import load_dotenv
+
+# Force load_dotenv to override any cached system environment variables
+load_dotenv(override=True)
 
 # Configuration (loaded from environment variables)
-# ==========================================
+# ==================================================
 
 # Free, keyless API endpoint for country data
 API_URL = "https://countries.dev/countries"
@@ -24,7 +28,7 @@ AWS_REGION = os.getenv("AWS_REGION", "eu-north-1")
 
 
 # Step 1 - Fetch Data from Countries API
-# ==========================================
+# ==================================================
 def fetch_country_data():
     """
     Calls the Countries API and returns the raw JSON response.
@@ -39,7 +43,7 @@ def fetch_country_data():
 
 
 # Step 2 - Upload Raw Data to AWS S3
-# ==========================================
+# ==================================================
 def upload_to_s3(data):
     """
     Uploads the raw JSON data into an S3 bucket.
@@ -74,7 +78,7 @@ def upload_to_s3(data):
 
 
 # Main Execution Block
-# ==========================================
+# ==================================================
 if __name__ == "__main__":
     try:
         raw_data = fetch_country_data()
