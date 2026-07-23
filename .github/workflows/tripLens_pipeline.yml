@@ -1,6 +1,9 @@
 name: TripLens Data Pipeline
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     # Run every day at 08:30 AM CET (07:30 UTC)
     - cron: '30 7 * * *'
@@ -27,7 +30,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. Extract and upload raw data to S3
+      # 4. Extract data and upload to S3 / Snowflake
       - name: Run data extractor
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -35,6 +38,12 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
           API_KEY: ${{ secrets.API_KEY }}
+          SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_DATABASE: TRIPLENS_DB
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
         run: |
           python extract_country_data.py
 
@@ -48,5 +57,6 @@ jobs:
           DBT_SNOWFLAKE_DATABASE: TRIPLENS_DB
           DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
         run: |
+          dbt deps
           dbt run --profiles-dir .
           dbt test --profiles-dir .
