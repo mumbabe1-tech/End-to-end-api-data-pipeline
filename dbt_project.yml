@@ -1,0 +1,30 @@
+name: 'triplens_dbt'
+version: '1.0.0'
+config-version: 2
+
+# The dbt profile to use (defined in profiles.yml)
+profile: 'triplens_dbt'
+
+# Project folder structure
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Folders dbt should clean when running `dbt clean`
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Model configurations
+models:
+  triplens_dbt:
+    staging:
+      +schema: RAW
+      +materialized: view
+
+    marts:
+      +schema: MARTS
+      +materialized: table

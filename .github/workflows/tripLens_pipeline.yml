@@ -1,0 +1,52 @@
+name: TripLens Data Pipeline
+
+on:
+  schedule:
+    # Run every day at 08:30 AM CET (07:30 UTC)
+    - cron: '30 7 * * *'
+  workflow_dispatch:  # Allows manual runs
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Get the project code
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # 2. Set up Python
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3. Install Python dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Extract and upload raw data to S3
+      - name: Run data extractor
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+        run: |
+          python scripts/fetch_and_upload.py
+
+      # 5. Run dbt transformations in Snowflake
+      - name: Run dbt models
+        env:
+          DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+          DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+          DBT_SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+          DBT_SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
+          DBT_SNOWFLAKE_DATABASE: TRIPLENS_DB
+          DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
+        run: |
+          cd dbt_project
+          dbt run --profiles-dir .
+          dbt test --profiles-dir .
