@@ -12,11 +12,11 @@ WITH raw_country_data AS (
 
 SELECT
     -- Country identifiers
-    RAW_DATA:cca3::STRING AS country_code,
-    RAW_DATA:name:common::STRING AS country_name,
+    RAW_DATA:alpha3Code::STRING AS country_code,
+    RAW_DATA:name::STRING AS country_name,
 
     -- Geographic information
-    RAW_DATA:capital[0]::STRING AS capital_city,
+    RAW_DATA:capital::STRING AS capital_city,
     RAW_DATA:region::STRING AS region,
     RAW_DATA:subregion::STRING AS subregion,
 
@@ -25,9 +25,9 @@ SELECT
     RAW_DATA:area::FLOAT AS total_area_square_kilometers,
 
     -- Membership information
-    RAW_DATA:unMember::BOOLEAN AS is_un_member,
+    RAW_DATA:independent::BOOLEAN AS is_un_member,
 
     -- Metadata
     INGESTED_AT
 FROM raw_country_data
-WHERE RAW_DATA:cca3 IS NOT NULL;
+WHERE RAW_DATA:alpha3Code IS NOT NULL;
