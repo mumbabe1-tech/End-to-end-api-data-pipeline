@@ -43,12 +43,10 @@
 
 A lightweight, automated ELT pipeline that integrates API ingestion, cloud storage, Snowflake warehousing, dbt transformations, and CI/CD orchestration through GitHub Actions. The system retrieves semi‑structured country data from the REST Countries API, stores raw JSON payloads in AWS S3, and processes them into analytics‑ready tables within Snowflake.
 
----
-
 ## Tech Stack & Tooling
 
 * Extraction & Environment: Python 3.10+, uv package manager (pyproject.toml, uv.lock)
-* Cloud Storage: AWS S3 (Raw JSON Data Lake)
+* Cloud Storage (Data Lake): AWS S3 (Raw JSON Bronze Landing Zone)
 * Data Warehouse: Snowflake (Semi-structured VARIANT parsing)
 * Transformation: dbt Core (dbt-snowflake adapter)
 * Automation & CI/CD: GitHub Actions (Daily automatic runs)
@@ -61,7 +59,7 @@ While building an end-to-end cloud pipeline requires real technical effort, this
 
 * No Always-On Servers: You do not need to pay for or manage servers running 24/7 (like Airflow).
 * Temporary Cloud Runners: GitHub Actions creates a temporary computer only when it needs to run, finishes the pipeline steps in minutes, and deletes itself immediately.
-* Separate Storage and Processing: AWS S3 handles cheap file storage, while Snowflake handles processing only when needed.
+* Decoupled Data Lake & Processing: AWS S3 serves as a cost-effective raw Data Lake to store historical API files, while Snowflake handles data processing only when needed.
 * Easy to Maintain: The pipeline runs on its own every morning without needing daily check-ins or costly upkeep.
 
 ---
@@ -73,7 +71,7 @@ The pipeline operates as a fully automated cloud system that runs every day at 0
 [REST Countries API] 
        |
        v (Python / boto3 / uv)
-[AWS S3 Raw Storage Bucket] 
+[AWS S3 Raw Storage Bucket]  <-- DATA LAKE (Raw JSON Landing Zone)
        |
        v (Snowflake Auto-Ingest / COPY)
 [Snowflake RAW Schema] 
@@ -81,17 +79,17 @@ The pipeline operates as a fully automated cloud system that runs every day at 0
        v (dbt Transformation Views)
 [Snowflake MARTS Schema]
 
-### 1. Daily Extraction & AWS S3 Storage
+### 1. Daily Extraction & AWS S3 Data Lake Ingestion
 * Trigger: Runs automatically every day (37 7 * * *) or whenever new code is saved to main.
 * Extraction Script: Executed via uv run extract_country_data.py.
-* S3 Storage Folder: 
+* Data Lake Destination: 
   s3://triplens-landing-zone-ifeoma1/raw_travel_data/countries_YYYYMMDD_HHMMSS.json
 
 ### 2. Snowflake Database Structure
 * Database: TRIPLENS_DB
 * Setup Script: snowflake_raw_layer_setup.sql
 * Schemas:
-  * RAW: Holds raw JSON data directly from AWS S3 using Snowflake's VARIANT column type.
+  * RAW: Holds raw JSON data directly from the S3 Data Lake using Snowflake's VARIANT column type.
     * Table: TRIPLENS_DB.RAW.RAW_COUNTRIES (src VARIANT, loaded_at TIMESTAMP)
   * MARTS: Holds clean, final views ready for analysis.
     * View: TRIPLENS_DB.RAW.countries_mart
@@ -122,7 +120,7 @@ triplens-countries-explorer/
 ├── .gitignore                         # Files Git should ignore
 ├── .python-version                    # Python version settings
 ├── dbt_project.yml                    # Main dbt configuration file
-├── extract_country_data.py            # Python script to pull API data into AWS S3
+├── extract_country_data.py            # Python script to pull API data into AWS S3 Data Lake
 ├── main.py                            # Secondary script runner
 ├── Makefile                           # Development command shortcuts
 ├── profiles.yml                       # Snowflake connection setup for GitHub Actions
@@ -136,14 +134,14 @@ triplens-countries-explorer/
 
 ## What Was Learned & Technical Insights
 
-Building this pipeline gave great hands-on practice with pulling API data, storing cloud files, working in Snowflake, transforming data in dbt, and setting up automatic GitHub runs.
+Building this pipeline gave great hands-on practice with pulling API data, storing cloud files in a Data Lake, working in Snowflake, transforming data in dbt, and setting up automatic GitHub runs.
 
 ### 1. Matching Column Names Across Tools
 * Challenge: Mismatches between raw column names and the SQL model queries caused dbt build errors.
 * Insight: The dbt staging layer acts as the bridge. Making sure raw Snowflake column names match dbt queries prevents system errors.
 
 ### 2. Reading Nested JSON Data in Snowflake
-* Challenge: Reading values out of complex, nested JSON fields sent by the REST API.
+* Challenge: Reading values out of complex, nested JSON fields sent by the REST API into the Data Lake.
 * Insight: Learned how to use Snowflake's VARIANT format and array selectors (like src:capital[0]::STRING) to easily turn JSON into regular spreadsheet-style columns.
 
 ### 3. Writing Clean dbt SQL Code
