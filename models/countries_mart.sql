@@ -2,17 +2,15 @@
 ------------------------------------------------------------
 
 SELECT
-    country_code,
     country_name,
-    capital_city,
+    capital,
     region,
-    subregion,
     population,
-    total_area_square_kilometers,
+    area_sq_km,
 
     -- Calculate population density safely
     ROUND(
-        population / NULLIF(total_area_square_kilometers, 0),
+        population / NULLIF(area_sq_km, 0),
         2
     ) AS population_density_per_sq_km,
 

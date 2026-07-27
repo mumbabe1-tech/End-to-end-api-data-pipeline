@@ -5,7 +5,7 @@ sources:
     database: TRIPLENS_DB
     schema: RAW
     tables:
-      - name: COUNTRY_DATA
+      - name: RAW_COUNTRY_DATA
         description: "Raw country-level API data ingested into Snowflake."
         columns:
           - name: COUNTRY_NAME
@@ -14,7 +14,7 @@ sources:
               - not_null
 
 models:
-  - name: stg_country_data
+  - name: stage_raw_countries
     description: "Staging model that cleans and renames raw country API data."
     columns:
       - name: country_name
