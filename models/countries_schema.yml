@@ -1,0 +1,32 @@
+version: 2
+
+sources:
+  - name: raw_country_data
+    database: TRIPLENS_DB
+    schema: RAW
+    tables:
+      - name: COUNTRY_DATA
+        description: "Raw country-level API data ingested into Snowflake."
+        columns:
+          - name: COUNTRY_NAME
+            description: "Name of the country."
+            tests:
+              - not_null
+
+models:
+  - name: stg_country_data
+    description: "Staging model that cleans and renames raw country API data."
+    columns:
+      - name: country_name
+        description: "Primary key / standardized country name."
+        tests:
+          - unique
+          - not_null
+      - name: capital
+        description: "Capital city name."
+      - name: region
+        description: "Standardized region."
+      - name: population
+        description: "Country population count."
+      - name: area_sq_km
+        description: "Country surface area in square kilometers."
