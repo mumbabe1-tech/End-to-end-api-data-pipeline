@@ -1,5 +1,9 @@
 -- Purpose: Create a curated, analysis-ready countries table
 ------------------------------------------------------------
+WITH staging AS (
+    SELECT * FROM {{ ref('stage_raw_countries') }}
+)
+
 SELECT
     country_code,
     country_name,
@@ -7,20 +11,11 @@ SELECT
     capital_city,
     region,
     subregion,
-    continent,
     population,
     area_sq_km,
-
-    -- Calculate population density safely
-    ROUND(
-        population / NULLIF(area_sq_km, 0),
-        2
-    ) AS population_density_per_sq_km,
-
+    ROUND(population / NULLIF(area_sq_km, 0), 2) AS population_density_per_sq_km,
     currency_code,
     currency_name,
-
-    -- Metadata
+    currency_symbol,
     ingested_at AS last_updated_at
-
-FROM {{ ref('stage_raw_countries') }}
+FROM staging
