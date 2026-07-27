@@ -1,6 +1,5 @@
 -- Purpose: Create a curated, analysis-ready countries table
 ------------------------------------------------------------
-
 SELECT
     country_name,
     capital,
