@@ -52,6 +52,17 @@ jobs:
         run: |
           python extract_country_data.py
 
+      # Diagnostic step to safely verify secrets are reaching GitHub Actions
+      - name: Verify Secret Lengths
+        env:
+          ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+          USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+          PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+        run: |
+          python -c "import os; print('Account string length:', len(os.environ.get('ACCOUNT', '')))"
+          python -c "import os; print('User string length:', len(os.environ.get('USER', '')))"
+          python -c "import os; print('Password string length:', len(os.environ.get('PASSWORD', '')))"
+
       - name: Test dbt Connection
         run: dbt debug --profiles-dir .
 
