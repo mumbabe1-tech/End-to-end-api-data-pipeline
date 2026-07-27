@@ -39,7 +39,7 @@ WITH countries AS (
     -- Ingestion Tracking
     raw.loaded_at AS ingested_at
 
-  FROM TRIPLENS_DB.RAW.RAW_COUNTRIES AS raw
+  FROM {{ source('raw_country_data', 'RAW_COUNTRIES') }} AS raw
     JOIN LATERAL FLATTEN(input => raw.SRC) country
     LEFT JOIN LATERAL FLATTEN(input => country.value:currencies) currency
 )

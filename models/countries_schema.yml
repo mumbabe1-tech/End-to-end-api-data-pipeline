@@ -5,13 +5,8 @@ sources:
     database: TRIPLENS_DB
     schema: RAW
     tables:
-      - name: RAW_COUNTRY_DATA
+      - name: RAW_COUNTRIES
         description: "Raw country-level API data ingested into Snowflake."
-        columns:
-          - name: COUNTRY_NAME
-            description: "Name of the country."
-            tests:
-              - not_null
 
 models:
   - name: stage_raw_countries
@@ -22,7 +17,7 @@ models:
         tests:
           - unique
           - not_null
-      - name: capital
+      - name: capital_city
         description: "Capital city name."
       - name: region
         description: "Standardized region."
