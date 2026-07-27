@@ -3,7 +3,6 @@
 
 WITH raw_data AS (
     SELECT
-        -- Handle case where payload is either directly in SRC or in SRC.value
         SRC AS payload,
         loaded_at AS ingested_at
     FROM {{ source('raw_country_data', 'RAW_COUNTRIES') }}
@@ -30,16 +29,15 @@ countries AS (
         payload:timezones[0]::STRING AS timezone,
         payload:topLevelDomain[0]::STRING AS top_level_domain,
 
-        -- Flatten Currencies (safe for missing currency data)
-        currency.value:code::STRING AS currency_code,
-        currency.value:name::STRING AS currency_name,
-        currency.value:symbol::STRING AS currency_symbol,
+        -- Primary Currency Fields (grabbing first currency safely without FLATTEN)
+        payload:currencies[0].code::STRING AS currency_code,
+        payload:currencies[0].name::STRING AS currency_name,
+        payload:currencies[0].symbol::STRING AS currency_symbol,
 
         -- Metadata
         ingested_at
 
     FROM raw_data
-    LEFT JOIN LATERAL FLATTEN(input => payload:currencies) currency
 )
 
 SELECT * FROM countries
