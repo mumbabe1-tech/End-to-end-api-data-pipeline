@@ -1,43 +1,37 @@
 -- Purpose: Clean raw country JSON into structured columns
 ------------------------------------------------------------
 
-WITH raw_data AS (
-    SELECT
-        SRC AS payload,
-        loaded_at AS ingested_at
-    FROM {{ source('raw_country_data', 'RAW_COUNTRIES') }}
-),
+WITH countries AS (
+  SELECT
+    -- Identifiers & Names
+    raw.SRC:alpha3Code::STRING AS country_code,
+    raw.SRC:name::STRING AS country_name,
+    raw.SRC:nativeName::STRING AS official_name,
 
-countries AS (
-    SELECT
-        -- Identifiers & Names
-        payload:alpha3Code::STRING AS country_code,
-        payload:name::STRING AS country_name,
-        payload:nativeName::STRING AS official_name,
+    -- Geography & Demographics
+    raw.SRC:capital::STRING AS capital_city,
+    raw.SRC:region::STRING AS region,
+    raw.SRC:subregion::STRING AS subregion,
+    raw.SRC:area::NUMBER AS area_sq_km,
+    raw.SRC:population::NUMBER AS population,
+    raw.SRC:demonym::STRING AS demonym,
+    raw.SRC:independent::BOOLEAN AS is_sovereign,
 
-        -- Geography & Demographics
-        payload:capital::STRING AS capital_city,
-        payload:region::STRING AS region,
-        payload:subregion::STRING AS subregion,
-        payload:area::NUMBER AS area_sq_km,
-        payload:population::NUMBER AS population,
-        payload:demonym::STRING AS demonym,
-        payload:independent::BOOLEAN AS is_sovereign,
+    -- Codes & Time
+    raw.SRC:callingCodes[0]::STRING AS calling_code,
+    raw.SRC:timezones[0]::STRING AS timezone,
+    raw.SRC:topLevelDomain[0]::STRING AS top_level_domain,
 
-        -- Arrays / Lists (grabbing first element)
-        payload:callingCodes[0]::STRING AS calling_code,
-        payload:timezones[0]::STRING AS timezone,
-        payload:topLevelDomain[0]::STRING AS top_level_domain,
+    -- Currencies (extract primary without flattening to prevent duplicate rows)
+    raw.SRC:currencies[0].code::STRING AS currency_code,
+    raw.SRC:currencies[0].name::STRING AS currency_name,
+    raw.SRC:currencies[0].symbol::STRING AS currency_symbol,
 
-        -- Primary Currency Fields (extracting directly without FLATTEN)
-        payload:currencies[0].code::STRING AS currency_code,
-        payload:currencies[0].name::STRING AS currency_name,
-        payload:currencies[0].symbol::STRING AS currency_symbol,
+    -- Ingestion Tracking
+    raw.loaded_at AS ingested_at
 
-        -- Metadata
-        ingested_at
-
-    FROM raw_data
+  FROM {{ source('raw_country_data', 'RAW_COUNTRIES') }} AS raw
+  WHERE raw.SRC:name::STRING IS NOT NULL
 )
 
-SELECT * FROM countries
+SELECT DISTINCT * FROM countries
