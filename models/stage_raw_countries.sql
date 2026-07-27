@@ -29,7 +29,7 @@ countries AS (
         payload:timezones[0]::STRING AS timezone,
         payload:topLevelDomain[0]::STRING AS top_level_domain,
 
-        -- Primary Currency Fields (grabbing first currency safely without FLATTEN)
+        -- Primary Currency Fields (extracting directly without FLATTEN)
         payload:currencies[0].code::STRING AS currency_code,
         payload:currencies[0].name::STRING AS currency_name,
         payload:currencies[0].symbol::STRING AS currency_symbol,
