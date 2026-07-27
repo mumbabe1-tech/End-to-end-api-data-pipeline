@@ -1,47 +1,45 @@
 -- Purpose: Clean raw country JSON into structured columns
 ------------------------------------------------------------
 
-WITH countries AS (
-  SELECT
-    -- Identifiers & Names
-    country.value:cca3::STRING AS country_code,
-    country.value:names.common::STRING AS country_name,
-    country.value:names.official::STRING AS official_name,
+WITH raw_data AS (
+    SELECT
+        -- Handle case where payload is either directly in SRC or in SRC.value
+        SRC AS payload,
+        loaded_at AS ingested_at
+    FROM {{ source('raw_country_data', 'RAW_COUNTRIES') }}
+),
 
-    -- Geography & Demographics
-    country.value:capitals[0]:name::STRING AS capital_city,
-    country.value:region::STRING AS region,
-    country.value:subregion::STRING AS subregion,
-    country.value:continents[0]::STRING AS continent,
-    country.value:population::NUMBER AS population,
-    country.value:area.kilometers::NUMBER AS area_sq_km,
-    country.value:area.miles::NUMBER AS area_sq_miles,
-    country.value:landlocked::STRING AS is_landlocked,
+countries AS (
+    SELECT
+        -- Identifiers & Names
+        payload:alpha3Code::STRING AS country_code,
+        payload:name::STRING AS country_name,
+        payload:nativeName::STRING AS official_name,
 
-    -- Governance & Memberships
-    country.value:government_type::STRING AS government_type,
-    country.value:classification.sovereign::STRING AS is_sovereign,
-    country.value:memberships.un::BOOLEAN AS is_un_member,
-    country.value:memberships.eu::BOOLEAN AS is_eu_member,
-    country.value:memberships.arab_league::BOOLEAN AS is_arab_league_member,
-    country.value:memberships.african_union::BOOLEAN AS is_african_union_member,
+        -- Geography & Demographics
+        payload:capital::STRING AS capital_city,
+        payload:region::STRING AS region,
+        payload:subregion::STRING AS subregion,
+        payload:area::NUMBER AS area_sq_km,
+        payload:population::NUMBER AS population,
+        payload:demonym::STRING AS demonym,
+        payload:independent::BOOLEAN AS is_sovereign,
 
-    -- Codes & Time
-    country.value:calling_codes[0]::STRING AS calling_code,
-    country.value:date.start_of_week::STRING AS start_of_week,
-    country.value:timezones[0]::STRING AS timezone,
+        -- Arrays / Lists (grabbing first element)
+        payload:callingCodes[0]::STRING AS calling_code,
+        payload:timezones[0]::STRING AS timezone,
+        payload:topLevelDomain[0]::STRING AS top_level_domain,
 
-    -- Dynamic Currency Fields
-    currency.value:code::STRING AS currency_code,
-    currency.value:name::STRING AS currency_name,
-    currency.value:symbol::STRING AS currency_symbol,
+        -- Flatten Currencies (safe for missing currency data)
+        currency.value:code::STRING AS currency_code,
+        currency.value:name::STRING AS currency_name,
+        currency.value:symbol::STRING AS currency_symbol,
 
-    -- Ingestion Tracking
-    raw.loaded_at AS ingested_at
+        -- Metadata
+        ingested_at
 
-  FROM {{ source('raw_country_data', 'RAW_COUNTRIES') }} AS raw
-    JOIN LATERAL FLATTEN(input => raw.SRC) country
-    LEFT JOIN LATERAL FLATTEN(input => country.value:currencies) currency
+    FROM raw_data
+    LEFT JOIN LATERAL FLATTEN(input => payload:currencies) currency
 )
 
 SELECT * FROM countries
