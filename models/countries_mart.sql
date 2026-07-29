@@ -1,5 +1,11 @@
 -- Purpose: Create a curated, analysis-ready countries table
 ------------------------------------------------------------
+{{
+    config(
+        materialized='table'
+    )
+}}
+
 WITH staging AS (
     SELECT * FROM {{ ref('stage_raw_countries') }}
 )
