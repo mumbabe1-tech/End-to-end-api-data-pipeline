@@ -25,11 +25,26 @@ SELECT
     stg.timezone AS timezone,
     stg.top_level_domain AS top_level_domain,
 
-    -- Clean Parsed Text Strings (No JSON)
-    (SELECT LISTAGG(f.value:name::string, ', ') FROM LATERAL FLATTEN(input => stg.languages_raw) f) AS all_languages,
-    (SELECT LISTAGG(f.value:name::string, ', ') FROM LATERAL FLATTEN(input => stg.currencies_raw) f) AS all_currencies,
-    (SELECT LISTAGG(f.value::string, ', ') FROM LATERAL FLATTEN(input => stg.borders_raw) f) AS all_neighboring_countries,
-    (SELECT LISTAGG(f.value::string, ', ') FROM LATERAL FLATTEN(input => stg.alt_spellings_raw) f) AS all_alternative_spellings,
+    -- Clean Comma-Separated Strings (Parsed safely from JSON arrays)
+    (
+        SELECT ARRAY_TO_STRING(ARRAY_AGG(f.value:name::string), ', ')
+        FROM LATERAL FLATTEN(input => stg.languages_raw) f
+    ) AS all_languages,
+    
+    (
+        SELECT ARRAY_TO_STRING(ARRAY_AGG(f.value:name::string), ', ')
+        FROM LATERAL FLATTEN(input => stg.currencies_raw) f
+    ) AS all_currencies,
+    
+    (
+        SELECT ARRAY_TO_STRING(ARRAY_AGG(f.value::string), ', ')
+        FROM LATERAL FLATTEN(input => stg.borders_raw) f
+    ) AS all_neighboring_countries,
+    
+    (
+        SELECT ARRAY_TO_STRING(ARRAY_AGG(f.value::string), ', ')
+        FROM LATERAL FLATTEN(input => stg.alt_spellings_raw) f
+    ) AS all_alternative_spellings,
 
     -- Primary fallbacks for single values
     stg.languages_raw[0]:name::string AS primary_language,
