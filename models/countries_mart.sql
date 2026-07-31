@@ -11,41 +11,28 @@ SELECT
     stg.official_name AS official_name,
     stg.capital_city AS capital_city,
     stg.country_code AS country_code,
-    NULL AS government_type,
-    NULL AS population,
     stg.region AS region,
     stg.subregion AS subregion,
-    
-    -- Attributes
-    NULL AS continent,
-    NULL AS independent,
     stg.area_sq_km AS kilometers,
-    NULL AS miles,
-    NULL AS landlocked,
-    FALSE AS un_member,
-    FALSE AS eu_member,
-    FALSE AS arab_league_member,
-    FALSE AS african_union_member,
-
-    NULL AS timezone,
-    NULL AS start_of_week,
-
-    -- Visuals & Identifiers
-    NULL AS flag_png,
-    NULL AS flag_svg,
-    NULL AS flag_alt,
-    NULL AS coat_of_arms_png,
-    NULL AS coat_of_arms_svg,
-    NULL AS postal_code_format,
-    NULL AS postal_code_regex,
     
-    -- Dynamic placeholders
-    NULL AS currency_code,
-    NULL AS currency_name,
-    NULL AS currency_symbol,
-    NULL AS language_code,
-    NULL AS language_name,
-    NULL AS top_level_domain,
-    NULL AS border_country_code
+    -- Analytics & Demographics
+    stg.payload:population::number AS population,
+    stg.payload:independent::boolean AS independent,
+    stg.payload:unMember::boolean AS un_member,
+    stg.payload:landlocked::boolean AS landlocked,
+    stg.payload:continents[0]::string AS continent,
+    stg.payload:startOfWeek::string AS start_of_week,
+
+    -- Extracting Flags & Maps
+    stg.payload:flags:png::string AS flag_png,
+    stg.payload:flags:svg::string AS flag_svg,
+    stg.payload:flags:alt::string AS flag_alt,
+
+    -- Extracting Languages (grabs the first spoken language object or string depending on API structure)
+    -- This flattens or extracts the language names cleanly for reporting
+    (SELECT VALUE FROM LATERAL FLATTEN(input => OBJECT_KEYS(stg.payload:languages)))[0]::string AS primary_language_code,
+    
+    -- Extracting Currencies (grabs the currency key/code)
+    (SELECT VALUE FROM LATERAL FLATTEN(input => OBJECT_KEYS(stg.payload:currencies)))[0]::string AS primary_currency_code
 
 FROM {{ ref('stage_raw_countries') }} AS stg
