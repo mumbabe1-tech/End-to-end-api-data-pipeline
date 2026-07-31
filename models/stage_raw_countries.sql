@@ -3,6 +3,9 @@
 
 WITH countries AS (
   SELECT
+    -- Pass the raw JSON object through for downstream flattening in marts
+    raw.SRC AS payload,
+
     -- Identifiers & Names
     raw.SRC:alpha3Code::STRING AS country_code,
     raw.SRC:name::STRING AS country_name,
@@ -21,11 +24,6 @@ WITH countries AS (
     raw.SRC:callingCodes[0]::STRING AS calling_code,
     raw.SRC:timezones[0]::STRING AS timezone,
     raw.SRC:topLevelDomain[0]::STRING AS top_level_domain,
-
-    -- Currencies (extract primary without flattening to prevent duplicate rows)
-    raw.SRC:currencies[0].code::STRING AS currency_code,
-    raw.SRC:currencies[0].name::STRING AS currency_name,
-    raw.SRC:currencies[0].symbol::STRING AS currency_symbol,
 
     -- Ingestion Tracking
     raw.loaded_at AS ingested_at
