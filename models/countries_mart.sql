@@ -7,19 +7,19 @@
 }}
 
 SELECT
-    stg.country AS country_name,
+    stg.country_name AS country_name,
     stg.official_name AS official_name,
     stg.capital_city AS capital_city,
     stg.country_code AS country_code,
     NULL AS government_type,
     NULL AS population,
-    NULL AS region,
-    NULL AS subregion,
+    stg.region AS region,
+    stg.subregion AS subregion,
     
     -- Attributes
     NULL AS continent,
     NULL AS independent,
-    NULL AS kilometers,
+    stg.area_sq_km AS kilometers,
     NULL AS miles,
     NULL AS landlocked,
     FALSE AS un_member,
