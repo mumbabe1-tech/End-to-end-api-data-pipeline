@@ -25,13 +25,13 @@ SELECT
     stg.timezone AS timezone,
     stg.top_level_domain AS top_level_domain,
 
-    -- All Languages, Currencies, Borders & Metadata (Aggregated so no data is hidden or missing)
-    stg.languages_raw AS all_languages_json,
-    stg.currencies_raw AS all_currencies_json,
-    stg.borders_raw AS all_neighboring_countries,
-    stg.alt_spellings_raw AS all_alternative_spellings,
+    -- Clean Parsed Text Strings (No JSON)
+    (SELECT LISTAGG(f.value:name::string, ', ') FROM LATERAL FLATTEN(input => stg.languages_raw) f) AS all_languages,
+    (SELECT LISTAGG(f.value:name::string, ', ') FROM LATERAL FLATTEN(input => stg.currencies_raw) f) AS all_currencies,
+    (SELECT LISTAGG(f.value::string, ', ') FROM LATERAL FLATTEN(input => stg.borders_raw) f) AS all_neighboring_countries,
+    (SELECT LISTAGG(f.value::string, ', ') FROM LATERAL FLATTEN(input => stg.alt_spellings_raw) f) AS all_alternative_spellings,
 
-    -- Primary fallbacks for easy viewing
+    -- Primary fallbacks for single values
     stg.languages_raw[0]:name::string AS primary_language,
     stg.currencies_raw[0]:name::string AS currency_name,
     stg.currencies_raw[0]:code::string AS currency_code,
