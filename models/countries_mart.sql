@@ -56,9 +56,9 @@ with countries as (
 
   FROM {{ ref('stage_raw_countries') }} AS stg
     JOIN LATERAL FLATTEN(input => stg.PAYLOAD) country
-    JOIN LATERAL FLATTEN(input => country.value:currencies) currency
-    JOIN LATERAL FLATTEN(input => country.value:languages) language
-    -- Left joins prevent dropping rows if a country is missing tld or borders
+    LEFT JOIN LATERAL FLATTEN(input => country.value:currencies) currency
+    LEFT JOIN LATERAL FLATTEN(input => country.value:languages) language
+    -- Left joins prevent dropping rows if a country is missing tld, borders, currencies, or languages
     LEFT JOIN LATERAL FLATTEN(input => country.value:tld) tld
     LEFT JOIN LATERAL FLATTEN(input => country.value:borders) border
 )
