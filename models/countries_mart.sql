@@ -26,13 +26,6 @@ SELECT
     -- Extracting Flags & Maps
     stg.payload:flags:png::string AS flag_png,
     stg.payload:flags:svg::string AS flag_svg,
-    stg.payload:flags:alt::string AS flag_alt,
-
-    -- Extracting Languages (grabs the first spoken language object or string depending on API structure)
-    -- This flattens or extracts the language names cleanly for reporting
-    (SELECT VALUE FROM LATERAL FLATTEN(input => OBJECT_KEYS(stg.payload:languages)))[0]::string AS primary_language_code,
-    
-    -- Extracting Currencies (grabs the currency key/code)
-    (SELECT VALUE FROM LATERAL FLATTEN(input => OBJECT_KEYS(stg.payload:currencies)))[0]::string AS primary_currency_code
+    stg.payload:flags:alt::string AS flag_alt
 
 FROM {{ ref('stage_raw_countries') }} AS stg
