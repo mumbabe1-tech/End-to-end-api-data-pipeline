@@ -23,6 +23,9 @@ SELECT
     stg.payload:continents[0]::string AS continent,
     stg.payload:startOfWeek::string AS start_of_week,
 
+    -- Languages (Extracting the name of the first language as a clean string)
+    stg.languages_raw[0]:name::string AS primary_language,
+
     -- Extracting Flags & Maps with fallback
     stg.payload:flags:png::string AS flag_png,
     stg.payload:flags:svg::string AS flag_svg,

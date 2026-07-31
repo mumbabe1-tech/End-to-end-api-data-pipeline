@@ -2,8 +2,8 @@
 ------------------------------------------------------------
 
 WITH countries AS (
+  -- Pass the raw JSON object through for downstream flattening in marts
   SELECT
-    -- Pass the raw JSON object through for downstream flattening in marts
     raw.SRC AS payload,
 
     -- Identifiers & Names
@@ -24,6 +24,9 @@ WITH countries AS (
     raw.SRC:callingCodes[0]::STRING AS calling_code,
     raw.SRC:timezones[0]::STRING AS timezone,
     raw.SRC:topLevelDomain[0]::STRING AS top_level_domain,
+    
+    -- Languages (Extracting the whole array or first language for simplicity)
+    raw.SRC:languages AS languages_raw,
 
     -- Ingestion Tracking
     raw.loaded_at AS ingested_at
