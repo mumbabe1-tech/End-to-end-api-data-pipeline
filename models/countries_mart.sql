@@ -55,8 +55,7 @@ with countries as (
     border.value::STRING AS border_country_code
 
   FROM {{ ref('stage_raw_countries') }} AS stg
-    -- Treat stg.PAYLOAD as the country object directly if stage has one row per country
-    CROSS JOIN (SELECT stg.PAYLOAD AS value) country
+    CROSS JOIN LATERAL FLATTEN(input => PARSE_JSON(stg.payload)) country
     LEFT JOIN LATERAL FLATTEN(input => country.value:currencies) currency
     LEFT JOIN LATERAL FLATTEN(input => country.value:languages) language
     -- Left joins prevent dropping rows if a country is missing tld, borders, currencies, or languages
