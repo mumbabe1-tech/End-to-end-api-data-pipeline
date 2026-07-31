@@ -15,13 +15,12 @@ SELECT
     stg.subregion AS subregion,
     stg.area_sq_km AS kilometers,
     
-    -- Analytics & Demographics
-    stg.payload:population::number AS population,
-    stg.payload:independent::boolean AS independent,
-    stg.payload:unMember::boolean AS un_member,
-    stg.payload:landlocked::boolean AS landlocked,
-    stg.payload:continents[0]::string AS continent,
-    stg.payload:startOfWeek::string AS start_of_week,
+    -- Demographics & Codes
+    stg.population AS population,
+    stg.is_sovereign AS independent,
+    stg.calling_code AS calling_code,
+    stg.timezone AS timezone,
+    stg.top_level_domain AS top_level_domain,
 
     -- Languages (Extracting the name of the first language as a clean string)
     stg.languages_raw[0]:name::string AS primary_language,
