@@ -37,7 +37,7 @@ WITH countries AS (
     raw.loaded_at AS ingested_at
 
   FROM {{ source('raw_country_data', 'RAW_COUNTRIES') }} AS raw
-  WHERE raw.SRC:name::STRING AS NOT NULL
+  WHERE raw.SRC:name::STRING IS NOT NULL
 )
 
 SELECT DISTINCT * FROM countries
