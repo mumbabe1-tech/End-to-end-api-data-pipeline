@@ -23,9 +23,9 @@ SELECT
     stg.payload:continents[0]::string AS continent,
     stg.payload:startOfWeek::string AS start_of_week,
 
-    -- Extracting Flags & Maps
+    -- Extracting Flags & Maps with fallback
     stg.payload:flags:png::string AS flag_png,
     stg.payload:flags:svg::string AS flag_svg,
-    stg.payload:flags:alt::string AS flag_alt
+    COALESCE(stg.payload:flags:alt::string, 'Not available') AS flag_alt
 
 FROM {{ ref('stage_raw_countries') }} AS stg
