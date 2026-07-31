@@ -35,6 +35,7 @@ SELECT
     stg.languages_raw[0]:name::string AS primary_language,
     stg.currencies_raw[0]:name::string AS currency_name,
     stg.currencies_raw[0]:code::string AS currency_code,
+    stg.currencies_raw[0]:symbol::string AS currency_symbol,
 
     -- Extracting Flags & Maps with fallback
     stg.payload:flags:png::string AS flag_png,
