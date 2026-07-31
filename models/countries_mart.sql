@@ -31,7 +31,7 @@ SELECT
     ARRAY_TO_STRING(stg.borders_raw, ', ') AS all_neighboring_countries,
     ARRAY_TO_STRING(stg.alt_spellings_raw, ', ') AS all_alternative_spellings,
 
-    -- Primary fallbacks for single values
+    -- Primary fallbacks for single values & Currency Details
     stg.languages_raw[0]:name::string AS primary_language,
     stg.currencies_raw[0]:name::string AS currency_name,
     stg.currencies_raw[0]:code::string AS currency_code,
