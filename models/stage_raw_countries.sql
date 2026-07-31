@@ -8,6 +8,8 @@ WITH countries AS (
 
     -- Identifiers & Names
     raw.SRC:alpha3Code::STRING AS country_code,
+    raw.SRC:alpha2Code::STRING AS alpha2_code,
+    raw.SRC:numericCode::STRING AS numeric_code,
     raw.SRC:name::STRING AS country_name,
     raw.SRC:nativeName::STRING AS official_name,
 
@@ -25,14 +27,17 @@ WITH countries AS (
     raw.SRC:timezones[0]::STRING AS timezone,
     raw.SRC:topLevelDomain[0]::STRING AS top_level_domain,
     
-    -- Additional raw elements needed downstream
+    -- Complex Raw Elements (Languages, Currencies, Borders, Alt Spellings)
     raw.SRC:languages AS languages_raw,
+    raw.SRC:currencies AS currencies_raw,
+    raw.SRC:borders AS borders_raw,
+    raw.SRC:altSpellings AS alt_spellings_raw,
 
     -- Ingestion Tracking
     raw.loaded_at AS ingested_at
 
   FROM {{ source('raw_country_data', 'RAW_COUNTRIES') }} AS raw
-  WHERE raw.SRC:name::STRING IS NOT NULL
+  WHERE raw.SRC:name::STRING AS NOT NULL
 )
 
 SELECT DISTINCT * FROM countries
