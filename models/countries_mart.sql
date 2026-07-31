@@ -25,12 +25,16 @@ SELECT
     stg.timezone AS timezone,
     stg.top_level_domain AS top_level_domain,
 
-    -- Languages, Currencies, Borders & Metadata
+    -- All Languages, Currencies, Borders & Metadata (Aggregated so no data is hidden or missing)
+    stg.languages_raw AS all_languages_json,
+    stg.currencies_raw AS all_currencies_json,
+    stg.borders_raw AS all_neighboring_countries,
+    stg.alt_spellings_raw AS all_alternative_spellings,
+
+    -- Primary fallbacks for easy viewing
     stg.languages_raw[0]:name::string AS primary_language,
     stg.currencies_raw[0]:name::string AS currency_name,
     stg.currencies_raw[0]:code::string AS currency_code,
-    stg.borders_raw AS neighboring_countries,
-    stg.alt_spellings_raw[0]::string AS alternate_spelling,
 
     -- Extracting Flags & Maps with fallback
     stg.payload:flags:png::string AS flag_png,
